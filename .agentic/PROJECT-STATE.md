@@ -90,3 +90,14 @@
   node; delete clears list+search via sqlite3.
 - Status partial: in-app read-view eyeball, opener behavior, confirm flow
   need a GUI run.
+
+### 2026-09-06 — PRE-5 (ticket-runner run)
+
+- Implemented export: dialog+fs plugins (npm + Cargo deps, lib.rs init,
+  capabilities with dialog:default and $HOME-scoped allow-write-text-file /
+  exists / mkdir; permission IDs read from the crate manifests), src/export.ts
+  (file format, name sanitize, conflict detection), footer buttons, overwrite
+  confirm (decline keeps old files), loud failure (status + error dialog).
+- Verified: tsc, vite build, cargo check + cargo build green; format/sanitize/
+  conflicts via node; 10-file loop incl. decline-untouched via files.
+- Status partial: in-app dialogs + unwritable-location error need a GUI run.
