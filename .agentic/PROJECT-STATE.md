@@ -52,3 +52,11 @@
   journal logic via node. Rust side parse-checked only (no webkit dev headers here).
 - Runtime GUI checks + full Rust compile need a GUI-capable machine — ticket marked
   partial with the remaining checks named.
+
+### 2026-09-06 — PRE-1 resumed (ticket-runner run)
+
+- No code change: the implementation still matches the Spec.
+- Full Rust compile now green (`cargo build` in src-tauri, exit 0); re-verified
+  tsc, vite build, migration SQL via sqlite3.
+- Status stays partial: cold-start cursor timing, kill-app persistence,
+  quit-mid-debounce, Saved-indicator observation need a GUI run.

@@ -69,7 +69,7 @@ is solved, not demoed.
 
 #### PRE-1 — Open-to-typing in 60 seconds with autosave
 
-**Status: partial 2026-09-06 — static checks green (tsc, vite build, migration SQL via sqlite3, journal logic via node); remaining: cold-start cursor timing, kill-app persistence, quit-mid-debounce, Saved-indicator observation, and full Rust compile — all need a GUI-capable machine**
+**Status: partial 2026-09-06 — tsc, vite build, cargo check + cargo build, migration SQL via sqlite3, journal logic all green; remaining: cold-start cursor timing, kill-app persistence, quit-mid-debounce, Saved-indicator observation — all need a GUI run**
 
 - **Objective:** Launching the app lands the user in today's entry, ready to type,
   and no edit is ever lost to a forgotten save button.
@@ -91,6 +91,8 @@ is solved, not demoed.
 
 #### PRE-2 — Local SQLite persistence with migration v1
 
+**Status: partial 2026-09-06 — migration applies clean via sqlite3, UNIQUE(day) enforced, all writes parameterized, title default verified in code; remaining: clean-profile launch + restart checks in the app (GUI run)**
+
 - **Objective:** Entries persist in a single local SQLite file, created and evolved
   only through versioned migrations.
 - **Spec:**
@@ -110,6 +112,8 @@ is solved, not demoed.
 
 #### PRE-3 — Entry list + substring search
 
+**Status: partial 2026-09-06 — tsc green; LIKE search (case-insensitive, newest-first, gibberish-empty, wildcard-escape) verified via sqlite3; 200-row list query <1 ms; remaining: in-app render timing, click latency, empty-states eyeball (GUI run)**
+
 - **Objective:** The user can get back to any entry in seconds by scrolling or searching.
 - **Spec:**
   - Sidebar lists entries reverse-chronological: day, title, first ~80 chars snippet.
@@ -123,6 +127,8 @@ is solved, not demoed.
   - Search gibberish → "No matches" state, editor content untouched.
 
 #### PRE-4 — Read view (Markdown render) + delete with confirm
+
+**Status: partial 2026-09-06 — tsc green; renderer covers headings/bold/italic/lists/links/code, script/img/javascript: links inert (node test), delete removes row from list+search (sqlite3); remaining: in-app read-view eyeball, opener behavior, delete-confirm + Esc flow (GUI run)**
 
 - **Objective:** Entries are readable as formatted text, and deletion is possible,
   deliberate, and complete.
@@ -139,6 +145,8 @@ is solved, not demoed.
   - Delete → confirm → entry gone from list, search, and full export; Esc leaves it intact.
 
 #### PRE-5 — Markdown export (single entry + full)
+
+**Status: partial 2026-09-06 — tsc + vite build + cargo check/build green; file format, sanitize, conflict/decline logic verified (node + 10-file loop); remaining: in-app save/folder dialogs, overwrite confirm, unwritable-location error (GUI run)**
 
 - **Objective:** The user's words are never trapped: anything written can leave as
   plain Markdown files (the "how does this get exported" answer).
