@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>vault-log — Private journaling that stays yours</title>
+    <meta
+      name="description"
+      content="vault-log is a local-first encrypted daily journal that keeps your thoughts private, searchable, and ready whenever you need them."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="brand-wrap">
+          <div class="brand-mark">V</div>
+          <div class="brand-text">vault-log</div>
+        </div>
+        <nav class="top-nav" aria-label="Primary navigation">
+          <a href="#story">Story</a>
+          <a href="#features">Features</a>
+          <a href="#waitlist">Waitlist</a>
+        </nav>
+        <a class="header-button" href="#waitlist">Join waitlist</a>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">A calmer way to remember your life</p>
+            <h1>Keep the story of your life where it belongs: with you.</h1>
+            <p class="lede">
+              vault-log is a private daily journal built for the moments that matter most —
+              the thoughts you want to keep honest, searchable, and safe without turning your
+              inner life into a product feed.
+            </p>
+
+            <div class="hero-actions">
+              <a class="primary-button" href="#waitlist">Get early access</a>
+              <a class="secondary-button" href="#story">Read the story</a>
+            </div>
+
+            <ul class="hero-points" aria-label="Product highlights">
+              <li>Local-first, encrypted at rest</li>
+              <li>One entry a day, no pressure</li>
+              <li>Search, export, and revisit your past</li>
+            </ul>
+          </div>
+
+          <div class="device-card" aria-label="vault-log mockup illustration">
+            <div class="window-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+
+            <div class="entry-meta">
+              <span class="pill">Thursday</span>
+              <span class="date">September 6</span>
+            </div>
+
+            <div class="entry-body">
+              <h2>Notes from today</h2>
+              <p>
+                I kept thinking about the quiet moments. The best ideas usually come when the
+                room is still and I am honest enough to listen.
+              </p>
+              <p>
+                I want a place for that kind of thinking — somewhere private, calm, and always
+                available.
+              </p>
+            </div>
+
+            <div class="mini-actions">
+              <span>Saved</span>
+              <span>Search</span>
+              <span>Export</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="metrics" aria-label="Product metrics">
+          <article>
+            <strong>Local-first</strong>
+            <span>Your words live on your machine first.</span>
+          </article>
+          <article>
+            <strong>Private by default</strong>
+            <span>Encrypted storage, no public feed, no noise.</span>
+          </article>
+          <article>
+            <strong>Built to last</strong>
+            <span>Search, export, and revisit entries on your own terms.</span>
+          </article>
+        </section>
+
+        <section id="story" class="story-section">
+          <div class="section-label">The story</div>
+          <h2>We built vault-log for the people who have ever felt watched by their apps.</h2>
+          <div class="story-grid">
+            <div class="story-copy">
+              <p>
+                The best journaling tools should disappear into the background. They should let you
+                capture a thought, a win, a regret, or a tiny bit of hope without asking you to trade
+                your privacy for a calendar reminder.
+              </p>
+              <p>
+                We started with a simple idea: what if your journal felt like a real private space —
+                one that keeps your words on your device, remembers what matters, and helps you look back
+                without the pressure of public posting or algorithmic nudges?
+              </p>
+            </div>
+            <blockquote>
+              “Not another app trying to monetize your inner life. A quiet place to keep it safe.”
+            </blockquote>
+          </div>
+        </section>
+
+        <section id="features" class="features-section">
+          <div class="section-label">Why people stay</div>
+          <h2>Simple enough to use every day. Private enough to trust with your real thoughts.</h2>
+
+          <div class="feature-grid">
+            <article class="feature-card">
+              <div class="icon">01</div>
+              <h3>Private default</h3>
+              <p>
+                Your journal is local-first and encrypted at rest, so the app works with you, not
+                around your privacy.
+              </p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon">02</div>
+              <h3>Made for regular reflection</h3>
+              <p>
+                One entry per day, searchable history, and a distraction-free editor designed for the kind
+                of reflection that actually sticks.
+              </p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon">03</div>
+              <h3>Own your archive</h3>
+              <p>
+                Export a single day or your full journal. Your memories are portable because they are yours.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="waitlist" class="waitlist-section">
+          <div class="waitlist-copy">
+            <div class="section-label">Early access</div>
+            <h2>Join the vault-log waitlist.</h2>
+            <p>
+              Be first to try the private journaling app built for people who want a calmer, more honest record
+              of their life — without the noise, surveillance, and pressure of social apps.
+            </p>
+            <ul class="check-list">
+              <li>Early access to the launch build</li>
+              <li>Founding-member updates</li>
+              <li>Priority feedback opportunities</li>
+            </ul>
+          </div>
+
+          <div class="waitlist-card">
+            <form id="waitlistForm" novalidate>
+              <label for="email">Email address</label>
+              <div class="input-wrap">
+                <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required />
+                <button type="submit">Join waitlist</button>
+              </div>
+              <p id="formStatus" class="form-status" aria-live="polite">
+                We’ll only send launch updates and a few thoughtful notes.
+              </p>
+            </form>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>vault-log</span>
+        <span>Private journaling, on your terms.</span>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
