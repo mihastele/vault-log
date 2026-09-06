@@ -343,7 +343,7 @@ export default function App() {
           aria-label="Entry date"
         />
         <span className="journal-title">{deriveTitle(body, day)}</span>
-        <span className="journal-status" role="status">
+        <span className="journal-status" role="status" data-state={saveState}>
           {statusLine()}
         </span>
       </header>

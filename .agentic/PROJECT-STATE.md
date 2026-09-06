@@ -123,3 +123,11 @@
   waitlist form that saves entries in `localStorage`.
 - Validated the page is served successfully over a local static server and the
   JavaScript parses without syntax errors.
+### 2026-09-07 — Visual restyle (user request, uncommitted)
+
+- Rewrote src/App.css: journal-like theme (serif prose, system-sans chrome,
+  deep-green accent, warm-neutral sidebar, full light/dark palettes via
+  prefers-color-scheme, save-state dot, dimmed dialog backdrop, focus-visible
+  rings, reduced-motion respected). One-line App.tsx hook (data-state).
+- Verified: tsc clean, vite build green, all 24 JSX classes present in CSS.
+- Not committed; user reviewing first.
