@@ -113,3 +113,13 @@
 - Status partial: install on a clean profile + full 20-minute walkthrough need
   a GUI machine. PRE as a whole stays partial for the same reason: every
   ticket's remaining checks are GUI runtime observations.
+
+### 2026-09-06 — website waitlist page
+
+- Created `website_waitlist/` with a plain HTML/CSS/JS marketing page for
+  vault-log built around the product story in `MILESTONES.md` and `README.md`.
+- The page emphasizes privacy, local-first journaling, the idea of preserving
+  a personal archive without social pressure, and includes a functioning email
+  waitlist form that saves entries in `localStorage`.
+- Validated the page is served successfully over a local static server and the
+  JavaScript parses without syntax errors.
