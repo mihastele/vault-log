@@ -60,3 +60,11 @@
   tsc, vite build, migration SQL via sqlite3.
 - Status stays partial: cold-start cursor timing, kill-app persistence,
   quit-mid-debounce, Saved-indicator observation need a GUI run.
+
+### 2026-09-06 — PRE-2 (ticket-runner run)
+
+- No code change: 001_init.sql + parameterized save/load + title default
+  (first Markdown heading, else date) already in place from PRE-1's storage slice.
+- Verified headless: migration applies on an empty DB, UNIQUE(day) rejects
+  duplicates, restart-intact follows from SQLite file semantics.
+- Status partial: clean-profile launch + in-app restart checks need a GUI run.
