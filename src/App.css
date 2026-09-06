@@ -21,11 +21,81 @@ body {
 
 .journal {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  gap: 16px;
   height: 100%;
-  max-width: 760px;
+  max-width: 1024px;
   margin: 0 auto;
   padding: 12px 16px;
+}
+
+.journal-side {
+  width: 264px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.journal-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.journal-search {
+  font: inherit;
+  padding: 6px 8px;
+}
+
+.journal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.journal-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  background: transparent;
+  color: inherit;
+  border: none;
+  border-top: 1px solid currentColor;
+  padding: 8px 4px;
+  cursor: pointer;
+}
+
+.journal-item.active {
+  font-weight: 600;
+}
+
+.journal-item-day,
+.journal-item-title,
+.journal-item-snippet {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.journal-item-day {
+  font-size: 13px;
+}
+
+.journal-item-snippet {
+  font-size: 13px;
+}
+
+.journal-empty {
+  font-size: 13px;
 }
 
 .journal-bar {
@@ -69,7 +139,96 @@ body {
 }
 
 .journal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   font-size: 13px;
   padding-top: 8px;
   border-top: 1px solid currentColor;
+}
+
+.journal-exports {
+  display: flex;
+  gap: 8px;
+}
+
+.journal-exports button {
+  font: inherit;
+  background: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  padding: 2px 10px;
+  cursor: pointer;
+}
+
+.journal-viewbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 4px 0 8px;
+}
+
+.journal-tab {
+  font: inherit;
+  background: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  padding: 2px 10px;
+  cursor: pointer;
+}
+
+.journal-tab.active {
+  font-weight: 600;
+}
+
+.journal-delete {
+  font: inherit;
+  margin-left: auto;
+  background: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  padding: 2px 10px;
+  cursor: pointer;
+}
+
+.journal-read {
+  flex: 1;
+  overflow-y: auto;
+  margin: 12px 0;
+  line-height: 1.7;
+}
+
+.journal-read pre {
+  overflow-x: auto;
+  padding: 8px;
+  border: 1px solid currentColor;
+}
+
+.journal-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.journal-dialog {
+  border: 1px solid currentColor;
+  background: canvas;
+  padding: 16px;
+  max-width: 420px;
+}
+
+.journal-dialog-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.journal-dialog-actions button {
+  font: inherit;
+  padding: 4px 12px;
+  cursor: pointer;
 }

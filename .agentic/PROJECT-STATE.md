@@ -68,3 +68,14 @@
 - Verified headless: migration applies on an empty DB, UNIQUE(day) rejects
   duplicates, restart-intact follows from SQLite file semantics.
 - Status partial: clean-profile launch + in-app restart checks need a GUI run.
+
+### 2026-09-06 — PRE-3 (ticket-runner run)
+
+- Implemented sidebar list + search: listEntries/searchEntries in src/db.ts
+  (parameterized LIKE, COLLATE NOCASE, ESCAPE wildcards, newest-first, blank
+  query restores full list), sidebar in App.tsx (day/title/~80-char snippet,
+  click-to-open, two empty states), sidebar layout in App.css.
+- Verified: tsc green; search semantics (3-match newest-first, gibberish empty,
+  literal % matched literally) via sqlite3; 200-row list query <1 ms.
+- Status partial: in-app render timing, click latency, empty-states eyeball
+  need a GUI run.
