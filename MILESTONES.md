@@ -165,6 +165,8 @@ is solved, not demoed.
 
 #### PRE-6 — Packaged build + README
 
+**Status: partial 2026-09-06 — README complete; `npm run tauri build` compiles release and produces working .deb + .rpm (contents verified: binary, .desktop, icons); AppImage step fails at linuxdeploy in this container; remaining: install on a clean profile + full 20-minute walkthrough (GUI machine)**
+
 - **Objective:** PRE is a real installable app, not a dev-server demo, and a new
   contributor can run it from the README alone.
 - **Spec:**

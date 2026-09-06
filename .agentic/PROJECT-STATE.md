@@ -101,3 +101,15 @@
 - Verified: tsc, vite build, cargo check + cargo build green; format/sanitize/
   conflicts via node; 10-file loop incl. decline-untouched via files.
 - Status partial: in-app dialogs + unwritable-location error need a GUI run.
+
+### 2026-09-06 — PRE-6 (ticket-runner run)
+
+- Wrote README (prereqs incl. webkit dev libs, install, dev/build, walkthrough
+  script, tsc/build/cargo commands, export/delete answers, fresh-start note).
+- `npm run tauri build`: release compiles (10m43s), .deb + .rpm produced and
+  contents-verified (ELF binary, .desktop entry, icons). AppImage bundling
+  fails at the linuxdeploy step in this container — packaging-env issue, not
+  app code. Build touched no tracked files.
+- Status partial: install on a clean profile + full 20-minute walkthrough need
+  a GUI machine. PRE as a whole stays partial for the same reason: every
+  ticket's remaining checks are GUI runtime observations.
