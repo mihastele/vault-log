@@ -79,3 +79,14 @@
   literal % matched literally) via sqlite3; 200-row list query <1 ms.
 - Status partial: in-app render timing, click latency, empty-states eyeball
   need a GUI run.
+
+### 2026-09-06 — PRE-4 (ticket-runner run)
+
+- Implemented src/markdown.ts (headings, bold, italic, flat ul/ol, links via
+  opener, inline + fenced code; input HTML-escaped first, javascript:/non-http
+  targets never linked), Edit/Read toggle, delete-in-Read-view with the exact
+  confirm text (Cancel default + Esc), db.deleteEntry.
+- Verified: tsc green; all elements + script/img/javascript: inertness via
+  node; delete clears list+search via sqlite3.
+- Status partial: in-app read-view eyeball, opener behavior, confirm flow
+  need a GUI run.
