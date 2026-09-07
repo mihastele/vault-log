@@ -131,3 +131,23 @@
   rings, reduced-motion respected). One-line App.tsx hook (data-state).
 - Verified: tsc clean, vite build green, all 24 JSX classes present in CSS.
 - Not committed; user reviewing first.
+
+### 2026-09-07 — PRE visual verification (headless Chrome vs production bundle)
+
+- Served `dist/` (fresh `npm run build`, tsc exit 0) on :8471; drove
+  headless Chrome 152 via a no-deps CDP script (`/tmp/cdp-visual.mjs`,
+  evidence `/tmp/vaultlog-shots/`: results.json + 5 screenshots, all eyeballed).
+- PRE-1: editor renders in ~350 ms with today's date, placeholder, "0 words";
+  typing shows live word count + `Saving…`; failures are loud, never silent.
+  Still needs the Tauri webview: autofocus + `Saved <time>` on success path,
+  kill-app persistence, quit-mid-debounce (plain Chrome has no SQL plugin).
+- PRE-3: both empty states render exactly; gibberish search leaves editor
+  untouched. Still needs webview: 200-row render timing, click latency.
+- PRE-4: Read view renders h1/bold/italic/lists/link/code; `<script>` inert
+  (text shown, zero script elements, no execution); delete dialog exact text,
+  Cancel focused, Esc closes. Still needs webview: opener behavior,
+  delete-then-gone-from-list.
+- PRE-2/5/6 unchanged (need webview/seeded DB/native dialogs/bundle install).
+- Ticked PRE milestone check "tsc + production build green" (evidence this run).
+- STOPPED — next: Tauri-webview run on a GUI machine for the remaining checks,
+  then M1 kickoff (KDF/AEAD decision).

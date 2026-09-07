@@ -69,7 +69,7 @@ is solved, not demoed.
 
 #### PRE-1 — Open-to-typing in 60 seconds with autosave
 
-**Status: partial 2026-09-06 — tsc, vite build, cargo check + cargo build, migration SQL via sqlite3, journal logic all green; remaining: cold-start cursor timing, kill-app persistence, quit-mid-debounce, Saved-indicator observation — all need a GUI run**
+**Status: partial 2026-09-07 — headless-Chrome visual pass on the production bundle (served dist/, results.json + 5 screenshots in /tmp/vaultlog-shots): editor renders in ~350 ms with today's date, placeholder, "0 words"; typing shows live word count + `Saving…`; failures are loud (`Save failed: …`, never silent). Remaining: cursor autofocus + `Saved <time>` on the success path, kill-app persistence, quit-mid-debounce — all need the Tauri webview (plain Chrome has no SQL plugin, so every flush fails loudly there)**
 
 - **Objective:** Launching the app lands the user in today's entry, ready to type,
   and no edit is ever lost to a forgotten save button.
@@ -112,7 +112,7 @@ is solved, not demoed.
 
 #### PRE-3 — Entry list + substring search
 
-**Status: partial 2026-09-06 — tsc green; LIKE search (case-insensitive, newest-first, gibberish-empty, wildcard-escape) verified via sqlite3; 200-row list query <1 ms; remaining: in-app render timing, click latency, empty-states eyeball (GUI run)**
+**Status: partial 2026-09-07 — headless-Chrome visual pass 2026-09-07: both empty states render exactly ("No entries yet — write today's.", "No matches for 'zqxjkv-gibberish'.") and gibberish search leaves the editor untouched (screenshot 05); LIKE semantics + 200-row <1 ms from earlier sqlite3 checks stand. Remaining: 200-row render timing, click-to-open latency — need the Tauri webview with a seeded DB**
 
 - **Objective:** The user can get back to any entry in seconds by scrolling or searching.
 - **Spec:**
@@ -128,7 +128,7 @@ is solved, not demoed.
 
 #### PRE-4 — Read view (Markdown render) + delete with confirm
 
-**Status: partial 2026-09-06 — tsc green; renderer covers headings/bold/italic/lists/links/code, script/img/javascript: links inert (node test), delete removes row from list+search (sqlite3); remaining: in-app read-view eyeball, opener behavior, delete-confirm + Esc flow (GUI run)**
+**Status: partial 2026-09-07 — headless-Chrome visual pass 2026-09-07: Read view shows h1/bold/italic/4 list items/link/code block (screenshots 03–04); `<script>alert(1)</script>` renders as inert text, zero script elements, no execution; delete dialog shows the exact confirm text with Cancel focused, Esc closes it (screenshot 04). Remaining: opener-plugin external navigation, delete-then-gone-from-list — need the Tauri webview with a real DB**
 
 - **Objective:** Entries are readable as formatted text, and deletion is possible,
   deliberate, and complete.
@@ -181,7 +181,7 @@ is solved, not demoed.
 ### Milestone checks (PRE is done when…)
 
 - [ ] The 20-minute walkthrough passes end-to-end on the packaged build, timed.
-- [ ] `npx tsc --noEmit` and the production build are green.
+- [x] `npx tsc --noEmit` and the production build are green. (verified 2026-09-07: tsc exit 0, `npm run build` green in ~240 ms)
 - [ ] Deleting the profile and relaunching migrates cleanly (PRE-2 check repeated).
 
 ---
