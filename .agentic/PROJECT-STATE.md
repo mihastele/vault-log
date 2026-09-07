@@ -151,3 +151,33 @@
 - Ticked PRE milestone check "tsc + production build green" (evidence this run).
 - STOPPED — next: Tauri-webview run on a GUI machine for the remaining checks,
   then M1 kickoff (KDF/AEAD decision).
+
+### 2026-09-07 — PRE webview run (real Tauri webview, isolated displays)
+
+- Ran the release binary outside dev mode with a clean temp-HOME profile:
+  first launch created `vaultlog.db` from `001_init.sql` (schema matches spec),
+  app shows `Ready`, zero app errors in process logs (only benign
+  no-GL/software-rendering warnings). Seeded 200 rows via sqlite3: duplicate
+  `day` insert rejected (`UNIQUE constraint failed: entries.day`); all 200 rows
+  loaded intact across 3 launches. PRE-2 marked done; profile-delete/migrate
+  milestone box ticked.
+- Rebuilt `npm run tauri build` from current source (3m39s): fresh .deb + .rpm,
+  contents verified (binary, .desktop, icons). AppImage step still fails at
+  packaging (linuxdeploy/`Text file busy` — env, not app code). No sudo here,
+  so installing on a clean profile remains open.
+- Input dead-ends (no keystrokes possible, documented for the next session):
+  :0/:1 are live user sessions — XTest was stopped after focus probes to avoid
+  harming the user's work; GTK Broadway backend renders frames but delivers no
+  mouse/key input (verified through CSD, webview, synthetic + CDP-char paths).
+  Possible stray keystrokes from the early :1 probes ("Cold start sentence…",
+  "Click focused…", "hello") — user was told to check :1 for stray text.
+- Finding (no product change made): default window 800x600 squeezes the
+  272px sidebar into a sliver — layout needs ~1100px+ to breathe. Temp
+  1600x1000 config was used for one render probe, then reverted
+  (`git checkout`), and the binary rebuilt with shipped config (4m00s, green).
+- Evidence: /tmp/vlshots/bw-*.png (webview shots), /tmp/vlhome (test profile,
+  untouched real profile at ~/.config/com.vaultlog.app).
+- STOPPED — next: interactive desktop session for PRE-1 (autofocus/Saved/
+  kill/quit-mid-debounce), PRE-3 (render/click/search typing), PRE-4 (opener,
+  delete-with-DB), PRE-5 (native dialogs + real files), PRE-6 (sudo install +
+  timed walkthrough); then M1 kickoff (KDF/AEAD decision).

@@ -69,7 +69,7 @@ is solved, not demoed.
 
 #### PRE-1 — Open-to-typing in 60 seconds with autosave
 
-**Status: partial 2026-09-07 — headless-Chrome visual pass on the production bundle (served dist/, results.json + 5 screenshots in /tmp/vaultlog-shots): editor renders in ~350 ms with today's date, placeholder, "0 words"; typing shows live word count + `Saving…`; failures are loud (`Save failed: …`, never silent). Remaining: cursor autofocus + `Saved <time>` on the success path, kill-app persistence, quit-mid-debounce — all need the Tauri webview (plain Chrome has no SQL plugin, so every flush fails loudly there)**
+**Status: partial 2026-09-07 — headless-Chrome pass (results.json + 5 shots in /tmp/vaultlog-shots) verified fast render, live word count, `Saving…`, loud failures; real-webview launch verified clean start (`Ready`) but no keystroke path exists here (live :1 display is user-active so XTest input was stopped; Broadway backend renders frames yet delivers zero input). Remaining: cursor autofocus, `Saved <time>`, kill-app persistence, quit-mid-debounce — need an interactive desktop session.**
 
 - **Objective:** Launching the app lands the user in today's entry, ready to type,
   and no edit is ever lost to a forgotten save button.
@@ -91,7 +91,7 @@ is solved, not demoed.
 
 #### PRE-2 — Local SQLite persistence with migration v1
 
-**Status: partial 2026-09-06 — migration applies clean via sqlite3, UNIQUE(day) enforced, all writes parameterized, title default verified in code; remaining: clean-profile launch + restart checks in the app (GUI run)**
+**Status: done 2026-09-07** — real-webview proof (release binary, clean temp-HOME profile on an isolated display): `vaultlog.db` created from `001_init.sql` on first launch, schema matches spec, app shows `Ready` with zero app errors in process logs; 200 seeded rows loaded intact across 3 launches (restart-intact); duplicate-`day` insert rejected (`UNIQUE constraint failed: entries.day`); all writes parameterized in code, title default `deriveTitle` covered by earlier headless checks.
 
 - **Objective:** Entries persist in a single local SQLite file, created and evolved
   only through versioned migrations.
@@ -112,7 +112,7 @@ is solved, not demoed.
 
 #### PRE-3 — Entry list + substring search
 
-**Status: partial 2026-09-07 — headless-Chrome visual pass 2026-09-07: both empty states render exactly ("No entries yet — write today's.", "No matches for 'zqxjkv-gibberish'.") and gibberish search leaves the editor untouched (screenshot 05); LIKE semantics + 200-row <1 ms from earlier sqlite3 checks stand. Remaining: 200-row render timing, click-to-open latency — need the Tauri webview with a seeded DB**
+**Status: partial 2026-09-07 — empty states exact + editor-untouched (headless shot 05); LIKE semantics + 200-row list query <1 ms via sqlite3 on the real schema; 200 seeded rows load in the webview with `Ready`, no errors. Remaining: in-app 200-row render eyeball, click-to-open latency, search typing (3-match + gibberish) — need an interactive desktop session.**
 
 - **Objective:** The user can get back to any entry in seconds by scrolling or searching.
 - **Spec:**
@@ -128,7 +128,7 @@ is solved, not demoed.
 
 #### PRE-4 — Read view (Markdown render) + delete with confirm
 
-**Status: partial 2026-09-07 — headless-Chrome visual pass 2026-09-07: Read view shows h1/bold/italic/4 list items/link/code block (screenshots 03–04); `<script>alert(1)</script>` renders as inert text, zero script elements, no execution; delete dialog shows the exact confirm text with Cancel focused, Esc closes it (screenshot 04). Remaining: opener-plugin external navigation, delete-then-gone-from-list — need the Tauri webview with a real DB**
+**Status: partial 2026-09-07 — headless pass: Read view renders h1/bold/italic/4 list items/link/code (shots 03–04); `<script>` inert (text shown, zero script elements, no execution); delete dialog exact text, Cancel focused, Esc closes (shot 04). Remaining: opener external navigation, delete-then-gone-from-list — need an interactive desktop session.**
 
 - **Objective:** Entries are readable as formatted text, and deletion is possible,
   deliberate, and complete.
@@ -146,7 +146,7 @@ is solved, not demoed.
 
 #### PRE-5 — Markdown export (single entry + full)
 
-**Status: partial 2026-09-06 — tsc + vite build + cargo check/build green; file format, sanitize, conflict/decline logic verified (node + 10-file loop); remaining: in-app save/folder dialogs, overwrite confirm, unwritable-location error (GUI run)**
+**Status: partial 2026-09-07 — tsc + vite + cargo green; format/sanitize/conflict-decline logic verified (node + 10-file loop); dialog capabilities (`dialog:default`, `$HOME`-scoped fs) read from manifests. Remaining: in-app save/folder dialogs, overwrite confirm, unwritable-location error — need an interactive desktop session (no input path here).**
 
 - **Objective:** The user's words are never trapped: anything written can leave as
   plain Markdown files (the "how does this get exported" answer).
@@ -165,7 +165,7 @@ is solved, not demoed.
 
 #### PRE-6 — Packaged build + README
 
-**Status: partial 2026-09-06 — README complete; `npm run tauri build` compiles release and produces working .deb + .rpm (contents verified: binary, .desktop, icons); AppImage step fails at linuxdeploy in this container; remaining: install on a clean profile + full 20-minute walkthrough (GUI machine)**
+**Status: partial 2026-09-07 — README complete; `npm run tauri build` recompiled 2026-09-07 from current source (release, 3m39s) and produced fresh .deb + .rpm (contents verified: binary, .desktop, icons); AppImage step fails (linuxdeploy/`Text file busy` — packaging-env, not app code); release binary launches outside dev mode on a clean profile. Remaining: install on a clean profile (needs sudo, unavailable) + timed 20-minute walkthrough on the installed bundle.**
 
 - **Objective:** PRE is a real installable app, not a dev-server demo, and a new
   contributor can run it from the README alone.
@@ -182,7 +182,7 @@ is solved, not demoed.
 
 - [ ] The 20-minute walkthrough passes end-to-end on the packaged build, timed.
 - [x] `npx tsc --noEmit` and the production build are green. (verified 2026-09-07: tsc exit 0, `npm run build` green in ~240 ms)
-- [ ] Deleting the profile and relaunching migrates cleanly (PRE-2 check repeated).
+- [x] Deleting the profile and relaunching migrates cleanly (PRE-2 check repeated). (verified 2026-09-07: fresh temp-HOME webview launch created `vaultlog.db` from `001_init.sql`, app `Ready`, no app errors)
 
 ---
 
