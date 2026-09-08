@@ -211,6 +211,8 @@ honestly instead of silently destroying data.
 
 #### M1-1 — Passphrase setup + encrypted format + plaintext migration
 
+**Status: done 2026-09-08 — PBKDF2 + AES-GCM vault setup landed with passphrase confirmation, encrypted-at-rest row writes, and plaintext migration backup; TypeScript + `npm run build` + `cargo check` are green.**
+
 - **Objective:** First launch after upgrade converts the vault to an encrypted
   format without risking the user's existing words.
 - **Spec:**

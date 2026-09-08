@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   AUTOSAVE_DEBOUNCE_MS,
@@ -11,12 +11,26 @@ import {
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { confirm as confirmDialog, message, open as openDialog, save } from "@tauri-apps/plugin-dialog";
 import { exists as fsExists, writeTextFile } from "@tauri-apps/plugin-fs";
-import { deleteEntry, getAllEntries, listEntries, loadEntry, saveEntry, searchEntries, type EntrySummary } from "./db";
+import {
+  deleteEntry,
+  ensureVaultMeta,
+  getAllEntries,
+  initializeVault,
+  isVaultConfigured,
+  listEntries,
+  loadEntry,
+  saveEntry,
+  searchEntries,
+  setVaultPassphrase,
+  type EntrySummary,
+  verifyVaultPassphrase,
+} from "./db";
 import { exportFileName, singleEntryFile } from "./export";
 import { renderMarkdown } from "./markdown";
 import "./App.css";
 
 type SaveState = "loading" | "ready" | "saving" | "saved" | "error";
+type VaultView = "loading" | "setup" | "unlock" | "ready";
 
 export default function App() {
   const [day, setDay] = useState(todayDay());
@@ -29,18 +43,38 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [view, setView] = useState<"edit" | "read">("edit");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [vaultView, setVaultView] = useState<VaultView>("loading");
+  const [vaultPassphrase, setVaultPassphraseInput] = useState("");
+  const [vaultConfirm, setVaultConfirm] = useState("");
+  const [understood, setUnderstood] = useState(false);
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const timerRef = useRef<number | null>(null);
 
-  // Refs mirror state for use inside timers and the close handler.
   const dayRef = useRef(day);
   const bodyRef = useRef(body);
   const existsRef = useRef(exists);
   dayRef.current = day;
   bodyRef.current = body;
   existsRef.current = exists;
+
+  async function hydrateJournal() {
+    setSaveState("loading");
+    setError("");
+    try {
+      const [row, rows] = await Promise.all([loadEntry(dayRef.current), listEntries()]);
+      setBody(row ? row.body_md : "");
+      setExists(row !== null);
+      setEntries(rows);
+      setSaveState("ready");
+      setView("edit");
+      editorRef.current?.focus();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      setSaveState("error");
+    }
+  }
 
   function clearTimer() {
     if (timerRef.current !== null) {
@@ -49,8 +83,8 @@ export default function App() {
     }
   }
 
-  /** Write pending text to disk. Skips days that were only viewed, never written. */
   async function flushPending() {
+    if (vaultView !== "ready") return;
     clearTimer();
     const text = bodyRef.current;
     if (!existsRef.current && text.trim() === "") return;
@@ -106,7 +140,6 @@ export default function App() {
     }
   }
 
-  /** Loud export failure: inline status plus an error dialog, never silent. */
   async function failExport(e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
     setError(`Export failed: ${msg}`);
@@ -114,7 +147,7 @@ export default function App() {
     try {
       await message(`Export failed: ${msg}`, { title: "Export failed", kind: "error" });
     } catch {
-      /* dialog unavailable (e.g. no window) — inline status still shows it */
+      // dialog unavailable (e.g. no window) — inline status still shows it
     }
   }
 
@@ -131,7 +164,7 @@ export default function App() {
         defaultPath: exportFileName(dayRef.current),
         filters: [{ name: "Markdown", extensions: ["md"] }],
       });
-      if (!path) return; // user cancelled the dialog
+      if (!path) return;
       await writeTextFile(path, singleEntryFile(row.title, row.body_md));
     } catch (e) {
       await failExport(e);
@@ -141,7 +174,7 @@ export default function App() {
   async function exportAllEntries() {
     try {
       const dir = await openDialog({ directory: true, multiple: false, title: "Choose export folder" });
-      if (!dir || Array.isArray(dir)) return; // user cancelled
+      if (!dir || Array.isArray(dir)) return;
       const rows = await getAllEntries();
       const conflicts: string[] = [];
       for (const r of rows) {
@@ -152,7 +185,7 @@ export default function App() {
           `${conflicts.length} file(s) already exist (${conflicts.slice(0, 5).join(", ")}${conflicts.length > 5 ? ", …" : ""}). Overwrite them?`,
           { title: "Overwrite existing exports?", kind: "warning" },
         );
-        if (!overwrite) return; // declining leaves the old files untouched
+        if (!overwrite) return;
       }
       for (const r of rows) {
         await writeTextFile(`${dir}/${exportFileName(r.day)}`, singleEntryFile(r.title, r.body_md));
@@ -162,7 +195,6 @@ export default function App() {
     }
   }
 
-  /** Open external links via the opener plugin; never navigate the webview. */
   async function onReadClick(e: React.MouseEvent) {
     const anchor = (e.target as HTMLElement).closest?.("a[href]");
     if (!anchor) return;
@@ -192,9 +224,8 @@ export default function App() {
     }
   }
 
-  // Search the list as the user types. Only the latest request wins;
-  // the editor body is never touched here.
   useEffect(() => {
+    if (vaultView !== "ready") return;
     let cancelled = false;
     (async () => {
       try {
@@ -207,10 +238,10 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [query]);
+  }, [query, vaultView]);
 
-  // Initial load: today's entry + full list, then focus the editor.
   useEffect(() => {
+    if (vaultView !== "ready") return;
     let cancelled = false;
     (async () => {
       try {
@@ -230,11 +261,8 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [vaultView]);
 
-  // Flush pending text before the window closes so at most the debounce
-  // window (~1 s) can be lost.
   useEffect(() => {
     let unlisten: (() => void) | null = null;
     try {
@@ -262,7 +290,6 @@ export default function App() {
     };
   }, []);
 
-  // Cancel is the default in the delete dialog: focus it on open, Esc closes.
   useEffect(() => {
     if (!confirmDelete) return;
     cancelRef.current?.focus();
@@ -273,7 +300,6 @@ export default function App() {
     return () => document.removeEventListener("keydown", onKey);
   }, [confirmDelete]);
 
-  // Flush when the tab loses visibility as a second safety net.
   useEffect(() => {
     const onHide = () => {
       if (document.visibilityState === "hidden") void flushRef.current();
@@ -281,6 +307,70 @@ export default function App() {
     document.addEventListener("visibilitychange", onHide);
     return () => document.removeEventListener("visibilitychange", onHide);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        await ensureVaultMeta();
+        const configured = await isVaultConfigured();
+        if (cancelled) return;
+        setVaultView(configured ? "unlock" : "setup");
+      } catch (e) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : String(e));
+          setVaultView("setup");
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function handleVaultSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+
+    if (vaultPassphrase.trim().length < 12) {
+      setError("Passphrase must be at least 12 characters.");
+      return;
+    }
+
+    if (vaultView === "setup") {
+      if (vaultPassphrase !== vaultConfirm) {
+        setError("Passphrase confirmation did not match.");
+        return;
+      }
+      if (!understood) {
+        setError("Please confirm the no-recovery warning before continuing.");
+        return;
+      }
+      try {
+        await initializeVault(vaultPassphrase);
+        setVaultPassphrase(vaultPassphrase);
+        setVaultView("ready");
+        setVaultPassphraseInput("");
+        setVaultConfirm("");
+        setUnderstood(false);
+        await hydrateJournal();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
+      return;
+    }
+
+    const valid = await verifyVaultPassphrase(vaultPassphrase);
+    if (!valid) {
+      setError("Wrong passphrase.");
+      return;
+    }
+
+    setVaultPassphrase(vaultPassphrase);
+    setVaultView("ready");
+    setVaultPassphraseInput("");
+    await hydrateJournal();
+  }
 
   function statusLine(): string {
     switch (saveState) {
@@ -295,6 +385,53 @@ export default function App() {
       case "ready":
         return "Ready";
     }
+  }
+
+  if (vaultView !== "ready") {
+    return (
+      <main className="journal">
+        <section className="journal-main" style={{ display: "grid", placeItems: "center" }}>
+          <form onSubmit={handleVaultSubmit} style={{ display: "grid", gap: "0.75rem", minWidth: 340 }}>
+            <h2>{vaultView === "setup" ? "Set up your vault" : "Unlock your vault"}</h2>
+            <label>
+              Passphrase
+              <input
+                type="password"
+                value={vaultPassphrase}
+                onChange={(e) => setVaultPassphraseInput(e.currentTarget.value)}
+                minLength={12}
+                autoComplete={vaultView === "setup" ? "new-password" : "current-password"}
+                style={{ width: "100%", boxSizing: "border-box" }}
+              />
+            </label>
+            {vaultView === "setup" && (
+              <>
+                <label>
+                  Confirm passphrase
+                  <input
+                    type="password"
+                    value={vaultConfirm}
+                    onChange={(e) => setVaultConfirm(e.currentTarget.value)}
+                    minLength={12}
+                    style={{ width: "100%", boxSizing: "border-box" }}
+                  />
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <input
+                    type="checkbox"
+                    checked={understood}
+                    onChange={(e) => setUnderstood(e.currentTarget.checked)}
+                  />
+                  I understand a forgotten passphrase cannot be recovered.
+                </label>
+              </>
+            )}
+            {error && <p role="alert" style={{ color: "#a11" }}>{error}</p>}
+            <button type="submit">{vaultView === "setup" ? "Create vault" : "Unlock"}</button>
+          </form>
+        </section>
+      </main>
+    );
   }
 
   return (
@@ -332,96 +469,92 @@ export default function App() {
         )}
       </aside>
       <section className="journal-main">
-      <header className="journal-bar">
-        <input
-          type="date"
-          className="journal-date"
-          value={day}
-          onChange={(e) => {
-            if (isValidDay(e.currentTarget.value)) void openDay(e.currentTarget.value);
-          }}
-          aria-label="Entry date"
-        />
-        <span className="journal-title">{deriveTitle(body, day)}</span>
-        <span className="journal-status" role="status" data-state={saveState}>
-          {statusLine()}
-        </span>
-      </header>
-      <div className="journal-viewbar" role="tablist" aria-label="Entry view">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={view === "edit"}
-          className={view === "edit" ? "journal-tab active" : "journal-tab"}
-          onClick={() => setView("edit")}
-        >
-          Edit
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={view === "read"}
-          className={view === "read" ? "journal-tab active" : "journal-tab"}
-          onClick={() => setView("read")}
-        >
-          Read
-        </button>
-        {view === "read" && (
+        <header className="journal-bar">
+          <input
+            type="date"
+            className="journal-date"
+            value={day}
+            onChange={(e) => {
+              if (isValidDay(e.currentTarget.value)) void openDay(e.currentTarget.value);
+            }}
+            aria-label="Entry date"
+          />
+          <span className="journal-title">{deriveTitle(body, day)}</span>
+          <span className="journal-status" role="status" data-state={saveState}>
+            {statusLine()}
+          </span>
+        </header>
+        <div className="journal-viewbar" role="tablist" aria-label="Entry view">
           <button
             type="button"
-            className="journal-delete"
-            onClick={() => setConfirmDelete(true)}
+            role="tab"
+            aria-selected={view === "edit"}
+            className={view === "edit" ? "journal-tab active" : "journal-tab"}
+            onClick={() => setView("edit")}
           >
-            Delete
+            Edit
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === "read"}
+            className={view === "read" ? "journal-tab active" : "journal-tab"}
+            onClick={() => setView("read")}
+          >
+            Read
+          </button>
+          {view === "read" && (
+            <button type="button" className="journal-delete" onClick={() => setConfirmDelete(true)}>
+              Delete
+            </button>
+          )}
+        </div>
+        {view === "edit" ? (
+          <textarea
+            ref={editorRef}
+            className="journal-editor"
+            value={body}
+            placeholder="Write today's entry…"
+            aria-label="Entry text"
+            onChange={(e) => {
+              setBody(e.currentTarget.value);
+              scheduleSave();
+            }}
+          />
+        ) : (
+          <article
+            className="journal-read"
+            aria-label="Rendered entry"
+            onClick={(e) => void onReadClick(e)}
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(body) }}
+          />
         )}
-      </div>
-      {view === "edit" ? (
-        <textarea
-          ref={editorRef}
-          className="journal-editor"
-          value={body}
-          placeholder="Write today's entry…"
-          aria-label="Entry text"
-          onChange={(e) => {
-            setBody(e.currentTarget.value);
-            scheduleSave();
-          }}
-        />
-      ) : (
-        <article
-          className="journal-read"
-          aria-label="Rendered entry"
-          onClick={(e) => void onReadClick(e)}
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(body) }}
-        />
-      )}
-      {confirmDelete && (
-        <div className="journal-dialog-backdrop">
-          <div role="alertdialog" aria-modal="true" aria-label="Confirm delete" className="journal-dialog">
-            <p>Delete the entry for {dayRef.current}? This cannot be undone.</p>
-            <div className="journal-dialog-actions">
-              <button type="button" className="journal-dialog-danger" onClick={() => void confirmDeleteEntry()}>
-                Delete
-              </button>
-              <button type="button" ref={cancelRef} onClick={() => setConfirmDelete(false)}>
-                Cancel
-              </button>
+        {confirmDelete && (
+          <div className="journal-dialog-backdrop">
+            <div role="alertdialog" aria-modal="true" aria-label="Confirm delete" className="journal-dialog">
+              <p>Delete the entry for {dayRef.current}? This cannot be undone.</p>
+              <div className="journal-dialog-actions">
+                <button type="button" className="journal-dialog-danger" onClick={() => void confirmDeleteEntry()}>
+                  Delete
+                </button>
+                <button type="button" ref={cancelRef} onClick={() => setConfirmDelete(false)}>
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-      <footer className="journal-foot">
-        <span>{countWords(body)} words</span>
-        <span className="journal-exports">
-          <button type="button" onClick={() => void exportThisEntry()}>
-            Export this entry
-          </button>
-          <button type="button" onClick={() => void exportAllEntries()}>
-            Export all
-          </button>
-        </span>
-      </footer>
+        )}
+        <footer className="journal-foot">
+          <span>{countWords(body)} words</span>
+          <span className="journal-exports">
+            <button type="button" onClick={() => void exportThisEntry()}>
+              Export this entry
+            </button>
+            <button type="button" onClick={() => void exportAllEntries()}>
+              Export all
+            </button>
+          </span>
+        </footer>
       </section>
     </main>
   );

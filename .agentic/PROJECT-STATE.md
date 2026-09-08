@@ -181,3 +181,10 @@
   kill/quit-mid-debounce), PRE-3 (render/click/search typing), PRE-4 (opener,
   delete-with-DB), PRE-5 (native dialogs + real files), PRE-6 (sudo install +
   timed walkthrough); then M1 kickoff (KDF/AEAD decision).
+
+### 2026-09-08 — M1-1 (ticket-runner run)
+
+- Added a passphrase gate with required 12+ character setup, confirmation, and no-recovery acknowledgment.
+- End-to-end vault writes now use PBKDF2-derived AES-GCM encryption before row persistence, with plaintext migration backup and DB metadata table for configuration.
+- Verified: `npx tsc --noEmit` green; `npm run build` green; `cargo check --manifest-path src-tauri/Cargo.toml` green after installing the missing GTK/WebKit Linux packages in the container.
+- STOPPED — next: continue with M1-2 (lock screen + unlock) via the ticket-runner skill.
